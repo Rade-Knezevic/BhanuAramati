@@ -8,11 +8,23 @@ Global $File_Attr[0][3]
 Global $Attr_Name[3] = ["", "", ""]
 
 Global $pathToDB = "C:\Users\Rade\Documents\GitHub\BhanuAramati\Database4.accdb"
-Global $pathToDB = "C:\Users\Rade\Documents\GitHub\files\"
+Global $pathToFiles = "C:\Users\Rade\Documents\GitHub\files\"
 Global $Table_Name = "bhanu"
 Global $Attr_Name[3] = ["", "", ""]
 
 _DBUpdate()
+
+$GroupHeight = 1
+$GroupWidth = 1
+$GroupsFromTop = 160
+$FilesGroupFromLeft = 23
+$RatingsGroupFromLeft = 23
+
+$ListWidth = 95
+$ListHeight = 195
+$ListsFromTop = 180
+$FileListFromLeft = 31
+$RatingsListFromLeft = 129
 
 $Form_Main = GUICreate("GUI managing Database", 250, 380)
 $Group_Attributes = GUICtrlCreateGroup("Attributes", 20, 20, 200, 130)
@@ -20,9 +32,12 @@ $Checkbox_1 = GUICtrlCreateCheckbox($Attr_Name[0], 40, 50)
 $Checkbox_2 = GUICtrlCreateCheckbox($Attr_Name[1], 40, 80)
 $Checkbox_3 = GUICtrlCreateCheckbox($Attr_Name[2], 40, 110)
 $idAddFile = GUICtrlCreateButton("Add", 160, 110, 50, 20)
-$Group_Files = GUICtrlCreateGroup("Files", 20, 160, 200, 200)
-$List = GUICtrlCreateList("", 40, 180, 180, 180)
+$Group_Files = GUICtrlCreateGroup("Files", $FilesGroupFromLeft, $GroupsFromTop, $GroupHeight, $GroupWidth )
+$Group_Ratings = GUICtrlCreateGroup("Ratings", $RatingsGroupFromLeft, $GroupsFromTop, $GroupHeight, $GroupWidth)
+$List = GUICtrlCreateList("", 27, $ListsFromTop, $ListWidth, $ListHeight)
+$ListRatings = GUICtrlCreateList("", 125, $ListsFromTop, $ListWidth, $ListHeight)
 GUISetState(@SW_SHOW)
+
 ; GUI loop
 While 1
     $msg = GUIGetMsg()
