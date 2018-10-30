@@ -7,8 +7,8 @@ Global $Files[0]
 Global $File_Attr[0][3]
 Global $Attr_Name[3] = ["", "", ""]
 
-Global $pathToDB = "C:\Users\Rade\Documents\GitHub\BhanuAramati\Database4.accdb"
-Global $pathToFiles = "C:\Users\Rade\Documents\GitHub\files\"
+Global $pathToDB = "C:\Users\Rade\Documents\GitHub\BhanuAramati\BhanuAramati\Database4.accdb"
+Global $pathToFiles = "C:\Users\Rade\Documents\GitHub\BhanuAramati\BhanuAramati\files"
 Global $Table_Name = "bhanu"
 Global $Attr_Name[3] = ["", "", ""]
 
@@ -50,15 +50,16 @@ While 1
         Case $GUI_EVENT_CLOSE ; Close GUI
             ExitLoop
         Case $idAddFile
-            $sFiles = FileOpenDialog("Select Files", @ScriptDir, "Text Files(*.txt)", 5)
-                If @error Then ContinueLoop
+            $sFileToBeCopied = FileOpenDialog("Select Files", @ScriptDir, "Text Files(*.txt)", 5)
+			FileCopy($sFileToBeCopied, $pathToFiles )
+            If @error Then ContinueLoop
             $AdoCon = ObjCreate("ADODB.Connection")
             $AdoCon.Open("Provider=Microsoft.ACE.OLEDB.12.0; Data Source=" & $pathToDB)
             $AdoRs = ObjCreate("ADODB.Recordset")
             $AdoRs.CursorType = 2
             $AdoRs.LockType = 3
             $AdoRs.Open("SELECT * FROM " & $Table_Name, $AdoCon)
-            $aFiles = StringSplit($sFiles, "|")
+            $aFiles = StringSplit($sFileToBeCopied, "|")
             Switch $aFiles[0]
                 Case 1
                     $AdoRs.AddNew
@@ -66,7 +67,8 @@ While 1
                     If BitAnd(GUICtrlRead($Checkbox_1),$GUI_CHECKED) = $GUI_CHECKED Then $AdoRs.Fields("Feld2").value = GUICtrlRead($Checkbox_1, 1)
                     If BitAnd(GUICtrlRead($Checkbox_2),$GUI_CHECKED) = $GUI_CHECKED Then $AdoRs.Fields("Feld3").value = GUICtrlRead($Checkbox_2, 1)
                     If BitAnd(GUICtrlRead($Checkbox_3),$GUI_CHECKED) = $GUI_CHECKED Then $AdoRs.Fields("Feld4").value = GUICtrlRead($Checkbox_3, 1)
-                    $AdoRs.Update
+                    $AdoRs.Fields("FilePath").value = $pathToFiles&"\"&StringTrimLeft($aFiles[1], StringInStr($aFiles[1], "\", 0, -1))
+					$AdoRs.Update
                 Case 2 To $aFiles[0]
                     For $i = 2 To $aFiles[0]
                         $AdoRs.AddNew
