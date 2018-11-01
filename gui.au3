@@ -5,10 +5,11 @@
 
 Global $Files[0]
 Global $File_Attr[0][3]
-Global $Attr_Name[3] = ["", "", ""]
 
-Global $pathToDB = "C:\Users\Rade\Documents\GitHub\BhanuAramati\BhanuAramati\Database4.accdb"
-Global $pathToFiles = "C:\Users\Rade\Documents\GitHub\BhanuAramati\BhanuAramati\files"
+Global $pathToDB = @ScriptDir & "\" &"Database4.accdb"
+Global $pathToFiles = @ScriptDir & "\" &"files"
+Global $pathToDownloads = @UserProfileDir & "\Downloads"
+
 Global $Table_Name = "bhanu"
 Global $Attr_Name[3] = ["", "", ""]
 
@@ -18,24 +19,25 @@ $GroupHeight = 1
 $GroupWidth = 1
 $GroupsFromTop = 160
 $FilesGroupFromLeft = 23
-$RatingsGroupFromLeft = 23
+$RatingsGroupFromLeft = 123
 
 $ListWidth = 95
 $ListHeight = 195
 $ListsFromTop = 180
-$FileListFromLeft = 31
-$RatingsListFromLeft = 129
+$FileListFromLeft = 27
+$RatingsListFromLeft = 125
 
 $Form_Main = GUICreate("GUI managing Database", 250, 380)
 $Group_Attributes = GUICtrlCreateGroup("Attributes", 20, 20, 200, 130)
 $Checkbox_1 = GUICtrlCreateCheckbox($Attr_Name[0], 40, 50)
 $Checkbox_2 = GUICtrlCreateCheckbox($Attr_Name[1], 40, 80)
 $Checkbox_3 = GUICtrlCreateCheckbox($Attr_Name[2], 40, 110)
-$idAddFile = GUICtrlCreateButton("Add", 160, 110, 50, 20)
-$Group_Files = GUICtrlCreateGroup("Files", $FilesGroupFromLeft, $GroupsFromTop, $GroupHeight, $GroupWidth )
-$Group_Ratings = GUICtrlCreateGroup("Ratings", $RatingsGroupFromLeft, $GroupsFromTop, $GroupHeight, $GroupWidth)
-$List = GUICtrlCreateList("", 27, $ListsFromTop, $ListWidth, $ListHeight)
-$ListRatings = GUICtrlCreateList("", 125, $ListsFromTop, $ListWidth, $ListHeight)
+$idAddFile = GUICtrlCreateButton("Add", 140, 70, 60, 20)
+$idDownloadFile = GUICtrlCreateButton("Download", 140, 110, 60, 20)
+$Group_Files = GUICtrlCreateGroup("Files", $FilesGroupFromLeft, $GroupsFromTop, $GroupWidth ,$GroupHeight )
+$Group_Ratings = GUICtrlCreateGroup("Ratings", $RatingsGroupFromLeft, $GroupsFromTop, $GroupWidth, $GroupHeight)
+$List = GUICtrlCreateList("", $FileListFromLeft, $ListsFromTop, $ListWidth, $ListHeight)
+$ListRatings = GUICtrlCreateList("", $RatingsListFromLeft, $ListsFromTop, $ListWidth, $ListHeight)
 GUISetState(@SW_SHOW)
 
 ; GUI loop
@@ -51,14 +53,14 @@ While 1
             ExitLoop
         Case $idAddFile
             $sFileToBeCopied = FileOpenDialog("Select Files", @ScriptDir, "Text Files(*.txt)", 5)
-			FileCopy($sFileToBeCopied, $pathToFiles )
-            If @error Then ContinueLoop
+			FileCopy($sFileToBeCopied, $pathToFiles)
+            If @error Then ContinueLoop	
             $AdoCon = ObjCreate("ADODB.Connection")
             $AdoCon.Open("Provider=Microsoft.ACE.OLEDB.12.0; Data Source=" & $pathToDB)
             $AdoRs = ObjCreate("ADODB.Recordset")
             $AdoRs.CursorType = 2
             $AdoRs.LockType = 3
-            $AdoRs.Open("SELECT * FROM " & $Table_Name, $AdoCon)
+            $AdoRs.Open("SELECT * FROM " & $Table_Name&";", $AdoCon) 
             $aFiles = StringSplit($sFileToBeCopied, "|")
             Switch $aFiles[0]
                 Case 1
@@ -76,7 +78,7 @@ While 1
                         If BitAnd(GUICtrlRead($Checkbox_1),$GUI_CHECKED) = $GUI_CHECKED Then $AdoRs.Fields("Feld2").value = GUICtrlRead($Checkbox_1, 1)
                         If BitAnd(GUICtrlRead($Checkbox_2),$GUI_CHECKED) = $GUI_CHECKED Then $AdoRs.Fields("Feld3").value = GUICtrlRead($Checkbox_2, 1)
                         If BitAnd(GUICtrlRead($Checkbox_3),$GUI_CHECKED) = $GUI_CHECKED Then $AdoRs.Fields("Feld4").value = GUICtrlRead($Checkbox_3, 1)
-                        $AdoRs.Fields("FilePath").value = $pathToFiles&"\"&StringTrimLeft($aFiles[$i], StringInStr($aFiles[1], "\", 0, -1))
+                        $AdoRs.Fields("FilePath").value = $pathToFiles&"\"&StringTrimLeft($aFiles[$i], StringInStr($aFiles[$i], "\", 0, -1))
 						$AdoRs.Update
                     Next
             EndSwitch
@@ -87,6 +89,11 @@ While 1
             Access($Checkbox_1)
             Access($Checkbox_2)
             Access($Checkbox_3)
+		case $idDownloadFile
+			FileCopy($FileToBeDownloaded, $pathToDownloads,0)
+			
+			; add here function for calculating ratings
+			
     EndSwitch
 WEnd
 
@@ -133,6 +140,7 @@ Func _DBUpdate()
     $AdoRs.Close
     $AdoCon.Close
 
+	; setting up checkboxes values
     Local $a = 0
     For $i = 0 To UBound($Files) - 1
         For $j = 0 To 2
@@ -147,4 +155,8 @@ Func _DBUpdate()
             EndIf
         Next
     Next
+EndFunc
+
+Func showMessage($message)
+	MsgBox(0, "Error", $message)
 EndFunc
