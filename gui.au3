@@ -2,6 +2,7 @@
 #include <File.au3>
 #include <GUIConstantsEx.au3>
 #include <GuiListBox.au3>
+#include <MouseOnEvent.au3>
 
 Global $Files[0]
 Global $File_Attr[0][3]
@@ -13,6 +14,7 @@ Global $pathToDownloads = @UserProfileDir & "\Downloads"
 Global $Table_Name = "bhanu"
 Global $Attr_Name[3] = ["", "", ""]
 
+Global $FileToBeDownloaded
 _DBUpdate()
 
 $GroupHeight = 1
@@ -36,19 +38,27 @@ $idAddFile = GUICtrlCreateButton("Add", 140, 70, 60, 20)
 $idDownloadFile = GUICtrlCreateButton("Download", 140, 110, 60, 20)
 $Group_Files = GUICtrlCreateGroup("Files", $FilesGroupFromLeft, $GroupsFromTop, $GroupWidth ,$GroupHeight )
 $Group_Ratings = GUICtrlCreateGroup("Ratings", $RatingsGroupFromLeft, $GroupsFromTop, $GroupWidth, $GroupHeight)
-$List = GUICtrlCreateList("", $FileListFromLeft, $ListsFromTop, $ListWidth, $ListHeight)
+Global $List = GUICtrlCreateList("", $FileListFromLeft, $ListsFromTop, $ListWidth, $ListHeight)
 $ListRatings = GUICtrlCreateList("", $RatingsListFromLeft, $ListsFromTop, $ListWidth, $ListHeight)
+
 GUISetState(@SW_SHOW)
 
 ; GUI loop
 While 1
     $msg = GUIGetMsg()
+	_MouseSetOnEvent($MOUSE_PRIMARYDBLCLK_EVENT, '_leftClk_Event')
     Switch $msg
         Case $Checkbox_1, $Checkbox_2, $Checkbox_3
             GUICtrlSetData($List, "")
             Access($Checkbox_1)
             Access($Checkbox_2)
             Access($Checkbox_3)
+			For $i=0 to UBound($List)
+				If _GUICtrlListBox_GetSel($List,$i) = true Then
+				$items = _GUICtrlListBox_GetSelItemsText($List)
+				showMessage($items)
+				Endif
+			Next
         Case $GUI_EVENT_CLOSE ; Close GUI
             ExitLoop
         Case $idAddFile
@@ -90,12 +100,25 @@ While 1
             Access($Checkbox_2)
             Access($Checkbox_3)
 		case $idDownloadFile
-			FileCopy($FileToBeDownloaded, $pathToDownloads,0)
-			
+			$testSel = _GUICtrlListBox_GetSelItemsText($List)
+			$FileToBeDownloaded = _GUICtrlListBox_GetSelItems($List)
+			showMessage($FileToBeDownloaded)
+			FileCopy($FileToBeDownloaded, $pathToDownloads,0) 
+			If @error Then 
+			showMessage("File not selected!")
+			Else 
+			showMessage("Downloaded!!!")
+			Endif
 			; add here function for calculating ratings
 			
     EndSwitch
 WEnd
+
+###########################################################################
+;																		  ;
+;''''''''''''''''''''''''''''''' FUNCTIONS ''''''''''''''''''''''''''''''';
+;																		  ;
+###########################################################################
 
 Func Access($Checkbox)
     If GUICtrlRead($Checkbox) = $GUI_CHECKED Then
@@ -159,4 +182,16 @@ EndFunc
 
 Func showMessage($message)
 	MsgBox(0, "Error", $message)
+EndFunc
+
+Func downloadFiles($selectedFiles)
+EndFunc
+
+Func _leftClk_Event($List)
+	$items = _GUICtrlListBox_GetSelItemsText($List)
+	;if $items != ""
+	showMessage($items)
+	;else
+	;showMessage("nista")
+	;Endif
 EndFunc
